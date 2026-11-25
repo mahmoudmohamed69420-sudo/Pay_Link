@@ -15,5 +15,13 @@ Customers receive an SMS and push notification upon payment completion or failur
 Deliverables
 Please provide valid PlantUML ER diagram code using entity blocks, showing primary keys (<<PK>>), foreign keys (<<FK>>), data types, and crow's foot cardinality relationships, followed by a clear explanation of each entity and how they connect.
 
+The prompt used to create 25 user stories:
+
+Now i want to start in phase 1 i want this app to be automic and secure as it contains transactions we are now in the user story phase. 
+We want to implement user stories for the system stake holders. 
+I want you to generate the most relevant user stories to the fr. 
+Generate 25 and evaluate what is critical for this type of system to be our non functional requirment. 
+Gather the stories under categories. Support, Notifications, Audit & Reconciliation,  Core payment processing, atomicity & biller adapters ,Biller Catalog & Inquiries,Accounts, Wallet & Ledger. 
+Each user story has its own pre requisit and its result.
 
 
