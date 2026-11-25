@@ -1,1 +1,19 @@
+The prompt given to the AI to generate ER diagram:
+
+I am designing a digital wallet and bill payment system called PayLink. 
+Please generate a PlantUML Entity-Relationship diagram and briefly explain the database entities and their relationships based on the following system requirements.
+Users, Wallets, and Ledger
+Customers can register at a basic verification level and later upgrade to a verified level to get higher transaction limits. Customers can view their available balance, held balance, and transaction history, as well as top up their wallet using a simulated card or agent cash. Every balance change must create a ledger entry, and wallet balances are computed directly from this ledger.
+Billers and Inquiries
+Admins can add, edit, and disable billers and their services. Customers can view available billers along with the specific input fields each one requires, and run a bill inquiry to see the amount, fee, and total before paying. The system must support at least three billers with different integration formats—ElectroCo, AquaCo, and TopUpNet—with NetCo batch processing as optional.
+Payments and Processing
+Customers can pay bills from their wallet, while agents can also pay on a customer's behalf to earn a commission. Repeated requests using the same idempotency key must return the original result. Payments must follow a strict lifecycle state machine, holding funds before calling the biller and releasing them if the payment fails. Timed-out payments move to an Unknown state for retries, and the system must accept asynchronous callbacks from TopUpNet while ignoring duplicates. Fees must follow configurable rules, including promotional periods.
+Limits, Security, and Operations
+Payments exceeding single or daily limits are rejected with a clear reason, and making more than 5 payments in 60 seconds automatically blocks an account for 10 minutes. Support staff can search payments by reference ID to view their full history, and can manually block or unblock accounts. Admins can update fee and limit values without redeploying the app, and every money movement or admin action must be saved to an audit log.
+Notifications, Refunds, and Reporting
+Customers receive an SMS and push notification upon payment completion or failure, with failed notifications retried 3 times before being marked undelivered. Customers can request refunds on completed payments for support approval. Finally, the system generates a daily reconciliation report from a settlement file, and lets admins view daily totals for payments, fees earned, commissions paid, and failures per biller.
+Deliverables
+Please provide valid PlantUML ER diagram code using entity blocks, showing primary keys (<<PK>>), foreign keys (<<FK>>), data types, and crow's foot cardinality relationships, followed by a clear explanation of each entity and how they connect.
+
+
 
