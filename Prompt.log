@@ -15,6 +15,24 @@ Customers receive an SMS and push notification upon payment completion or failur
 Deliverables
 Please provide valid PlantUML ER diagram code using entity blocks, showing primary keys (<<PK>>), foreign keys (<<FK>>), data types, and crow's foot cardinality relationships, followed by a clear explanation of each entity and how they connect.
 
+
+The prompt used to make the state diagram:
+
+Please generate a PlantUML state diagram code for the following states I am going to give you:
+These states represent a payment that is currently moving through the system and has not reached a final outcome yet.
+Initiated: The entry point when a payment is first created. The system immediately evaluates fraud rules and checks if the user's wallet has a sufficient balance. If checks pass, it moves to FundsHeld; if they fail, it moves to Rejected.
+FundsHeld: The required amount is temporarily locked or reserved in the user's wallet so it cannot be spent elsewhere while the transaction processes. Once the payment request is dispatched, it moves to SentToBiller.
+SentToBiller: The payment request has been transmitted to the external biller, and the system is actively waiting for a response. Depending on the outcome, it moves to Completed , Failed, or Unknown.
+Unknown: A temporary limbo state triggered when the biller does not respond within the expected timeout window, meaning the system cannot yet confirm if the biller processed the payment. 
+It resolves asynchronously via callbacks, retries, or end-of-day settlement and reconciliation files into either Completed or Failed.
+Failed: The biller explicitly refused the payment, or later reconciliation confirmed no payment went through. 
+Because funds were already locked in FundsHeld, this is not a final state—the money must still be returned to the user, which automatically triggers a release of the held funds back to the wallet and transitions the payment to Refunded.
+Rejected: The payment was stopped immediately at the start due to failing fraud checks or insufficient wallet funds, meaning no funds were ever held or sent.
+Completed: The happy-path end state where the biller confirmed the payment (either immediately or after resolving an Unknown timeout), meaning the held funds are permanently deducted.
+Refunded: The final state for a failed transaction where the hold placed during FundsHeld has been successfully released, restoring the user's available wallet balance.
+
+
+
 The prompt used to create 25 user stories:
 
 Now i want to start in phase 1 i want this app to be automic and secure as it contains transactions we are now in the user story phase. 
@@ -23,5 +41,9 @@ I want you to generate the most relevant user stories to the fr.
 Generate 25 and evaluate what is critical for this type of system to be our non functional requirment. 
 Gather the stories under categories. Support, Notifications, Audit & Reconciliation,  Core payment processing, atomicity & biller adapters ,Biller Catalog & Inquiries,Accounts, Wallet & Ledger. 
 Each user story has its own pre requisit and its result.
+
+
+
+
 
 
