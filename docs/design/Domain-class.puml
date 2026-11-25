@@ -1,0 +1,92 @@
+@startuml 02-domain-class
+title PayLink - Class Diagram
+hide empty members
+
+class User {
+  id
+  phone
+  role
+  level : BASIC / VERIFIED
+  status : ACTIVE / BLOCKED
+}
+
+class Wallet {
+  availableBalance : BigDecimal
+  heldBalance : BigDecimal
+  hold(amount)
+  release(amount)
+  capture(amount)
+}
+
+class LedgerEntry {
+  type
+  amount : BigDecimal
+  createdAt
+}
+
+class Payment {
+  reference
+  billAmount : BigDecimal
+  serviceFee : BigDecimal
+  state : PaymentState
+  changeState(newState)
+}
+
+enum PaymentState {
+  INITIATED
+  FUNDS_HELD
+  REJECTED
+  SENT_TO_BILLER
+  COMPLETED
+  FAILED
+  UNKNOWN
+  REFUNDED
+}
+
+class Biller {
+  name
+  active
+}
+
+class PaymentService {
+  pay(request, idempotencyKey)
+}
+
+class FeeCalculator {
+  calculateFee(amount, category)
+}
+
+class FraudChecker {
+  check(user, amount)
+}
+
+interface BillerPort {
+  inquiry()
+  pay()
+  queryStatus()
+}
+
+class ElectroCoAdapter
+class AquaCoAdapter
+class TopUpNetAdapter
+
+class NotificationService {
+  send(user, message)
+}
+
+User "1" -- "1" Wallet
+Wallet "1" -- "*" LedgerEntry
+User "1" -- "*" Payment
+Payment "*" -- "1" Biller
+Payment --> PaymentState
+
+PaymentService ..> FraudChecker
+PaymentService ..> FeeCalculator
+PaymentService ..> Wallet
+PaymentService ..> BillerPort
+PaymentService ..> NotificationService
+
+BillerPort <|.. ElectroCoAdapter
+BillerPort <|.. AquaCoAdapter
+BillerPort <|.. TopUpNetAdapter
+@enduml

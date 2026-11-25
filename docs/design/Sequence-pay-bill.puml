@@ -1,0 +1,18 @@
+@startuml 03-sequence-pay-bill
+title PayLink - Pay a Bill
+autonumber
+
+actor Customer
+participant PaymentService
+participant Wallet
+participant Biller
+
+Customer -> PaymentService : pay(bill, Idempotency-Key)
+PaymentService -> PaymentService : check limits, calculate fee
+PaymentService -> Wallet : hold(total)
+Wallet --> PaymentService : funds held
+PaymentService -> Biller : pay()
+Biller --> PaymentService : success
+PaymentService -> Wallet : capture(total)
+PaymentService --> Customer : COMPLETED + SMS/push
+@enduml

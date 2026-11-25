@@ -1,0 +1,38 @@
+@startuml 01-use-case
+title PayLink - Use Case Diagram
+left to right direction
+
+actor Customer
+actor Agent
+actor Support
+actor Admin
+actor Biller <<external>>
+
+rectangle PayLink {
+  usecase "Register account" as U1
+  usecase "Top up wallet" as U2
+  usecase "View wallet & history" as U3
+  usecase "Inquire bill & see fees" as U4
+  usecase "Pay bill" as U5
+  usecase "Receive notification" as U6
+  usecase "Look up payment" as U7
+  usecase "Block / unblock account" as U8
+  usecase "Manage billers & fees" as U9
+}
+
+Customer --> U1
+Customer --> U2
+Customer --> U3
+Customer --> U4
+Customer --> U5
+Agent --> U2
+Agent --> U5
+Support --> U7
+Support --> U8
+Admin --> U9
+
+U4 --> Biller
+U5 --> Biller
+
+U5 ..> U6 : <<include>>
+@enduml

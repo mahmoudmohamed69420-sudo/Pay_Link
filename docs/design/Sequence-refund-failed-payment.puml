@@ -1,0 +1,15 @@
+@startuml 04-sequence-refund-failed-payment
+title PayLink - Refund a Failed Payment
+autonumber
+
+actor Customer
+participant PaymentService
+participant Wallet
+participant Biller
+
+PaymentService -> Biller : pay()
+Biller --> PaymentService : refused
+PaymentService -> Wallet : release(total)
+Wallet --> PaymentService : balance restored
+PaymentService --> Customer : REFUNDED + SMS/push
+@enduml

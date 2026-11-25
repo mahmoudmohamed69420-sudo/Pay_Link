@@ -1,0 +1,272 @@
+
+@startuml ERDiagram
+
+' =========================
+' USER & ACCOUNT MANAGEMENT
+' =========================
+
+entity USER {
+    * user_id : uuid <<PK>>
+    --
+    email : string
+    phone_number : string
+    password_hash : string
+    role : enum
+    verification_level : enum
+    account_status : enum
+    blocked_until : timestamp
+    created_at : timestamp
+}
+
+entity ACCOUNT_BLOCK_HISTORY {
+    * block_id : uuid <<PK>>
+    --
+    user_id : uuid <<FK>>
+    actor_id : uuid <<FK>>
+    reason : string
+    blocked_at : timestamp
+    unblocked_at : timestamp
+}
+
+entity WALLET {
+    * wallet_id : uuid <<PK>>
+    --
+    user_id : uuid <<FK>>
+    currency : string
+    updated_at : timestamp
+}
+
+entity NOTIFICATION {
+    * notification_id : uuid <<PK>>
+    --
+    user_id : uuid <<FK>>
+    payment_id : uuid <<FK>>
+    channel : enum
+    status : enum
+    retry_count : int
+    last_attempt_at : timestamp
+}
+
+entity AUDIT_LOG {
+    * log_id : uuid <<PK>>
+    --
+    actor_id : uuid <<FK>>
+    action_type : string
+    entity_name : string
+    entity_id : uuid
+    old_values : json
+    new_values : json
+    created_at : timestamp
+}
+
+' =========================
+' WALLET & TRANSACTIONS
+' =========================
+
+entity LEDGER_ENTRY {
+    * entry_id : uuid <<PK>>
+    --
+    wallet_id : uuid <<FK>>
+    reference_id : uuid
+    reference_type : enum
+    bucket : enum
+    direction : enum
+    amount : decimal
+    created_at : timestamp
+}
+
+entity TOPUP {
+    * topup_id : uuid <<PK>>
+    --
+    wallet_id : uuid <<FK>>
+    method : enum
+    amount : decimal
+    status : enum
+    created_at : timestamp
+}
+
+' =========================
+' BILLER MANAGEMENT
+' =========================
+
+entity BILLER {
+    * biller_id : uuid <<PK>>
+    --
+    name : string
+    code : string <<UK>>
+    integration_type : enum
+    is_active : boolean
+}
+
+entity BILLER_SERVICE {
+    * service_id : uuid <<PK>>
+    --
+    biller_id : uuid <<FK>>
+    name : string
+    is_active : boolean
+}
+
+entity SERVICE_INPUT_FIELD {
+    * field_id : uuid <<PK>>
+    --
+    service_id : uuid <<FK>>
+    field_name : string
+    data_type : string
+    is_required : boolean
+}
+
+entity FEE_RULE {
+    * rule_id : uuid <<PK>>
+    --
+    service_id : uuid <<FK>>
+    fixed_fee : decimal
+    percentage_fee : decimal
+    promo_discount : decimal
+    promo_start : timestamp
+    promo_end : timestamp
+    is_active : boolean
+}
+
+entity BILL_INQUIRY {
+    * inquiry_id : uuid <<PK>>
+    --
+    user_id : uuid <<FK>>
+    service_id : uuid <<FK>>
+    input_payload : json
+    bill_amount : decimal
+    fee_amount : decimal
+    total_amount : decimal
+    expires_at : timestamp
+}
+
+' =========================
+' PAYMENT MANAGEMENT
+' =========================
+
+entity PAYMENT {
+    * payment_id : uuid <<PK>>
+    --
+    payment_reference : string <<UK>>
+    idempotency_key : string <<UK>>
+    customer_id : uuid <<FK>>
+    agent_id : uuid <<FK>>
+    service_id : uuid <<FK>>
+    inquiry_id : uuid <<FK>>
+    input_payload : json
+    bill_amount : decimal
+    fee_amount : decimal
+    agent_commission : decimal
+    total_debited : decimal
+    current_status : enum
+    retry_count : int
+    created_at : timestamp
+}
+
+entity PAYMENT_STATUS_HISTORY {
+    * history_id : uuid <<PK>>
+    --
+    payment_id : uuid <<FK>>
+    from_status : enum
+    to_status : enum
+    reason : string
+    changed_at : timestamp
+}
+
+entity BILLER_CALLBACK {
+    * callback_id : uuid <<PK>>
+    --
+    payment_id : uuid <<FK>>
+    external_tx_id : string <<UK>>
+    raw_payload : json
+    is_processed : boolean
+    received_at : timestamp
+}
+
+entity LIMIT_CONFIG {
+    * limit_id : uuid <<PK>>
+    --
+    verification_level : enum <<UK>>
+    single_payment_limit : decimal
+    daily_payment_limit : decimal
+    updated_at : timestamp
+}
+
+' =========================
+' REFUNDS
+' =========================
+
+entity REFUND_REQUEST {
+    * refund_id : uuid <<PK>>
+    --
+    payment_id : uuid <<FK>>
+    requested_by : uuid <<FK>>
+    approved_by : uuid <<FK>>
+    status : enum
+    reason : string
+    created_at : timestamp
+}
+
+' =========================
+' RECONCILIATION
+' =========================
+
+entity RECONCILIATION_REPORT {
+    * report_id : uuid <<PK>>
+    --
+    settlement_date : date <<UK>>
+    file_name : string
+    total_matched : int
+    total_discrepancies : int
+    generated_at : timestamp
+}
+
+entity RECONCILIATION_ITEM {
+    * item_id : uuid <<PK>>
+    --
+    report_id : uuid <<FK>>
+    payment_id : uuid <<FK>>
+    external_reference : string
+    settled_amount : decimal
+    match_status : enum
+}
+
+' =========================
+' RELATIONSHIPS
+' =========================
+
+' User relationships
+USER ||--o| WALLET : owns
+USER ||--o{ PAYMENT : initiates
+USER ||--o{ PAYMENT : acts_as_agent_for
+USER ||--o{ NOTIFICATION : receives
+USER ||--o{ AUDIT_LOG : triggers
+USER ||--o{ REFUND_REQUEST : requests
+USER ||--o{ ACCOUNT_BLOCK_HISTORY : undergoes
+
+' Wallet relationships
+WALLET ||--o{ LEDGER_ENTRY : records
+WALLET ||--o{ TOPUP : receives
+
+' Transaction relationships
+PAYMENT ||--o{ LEDGER_ENTRY : generates
+TOPUP ||--o{ LEDGER_ENTRY : generates
+REFUND_REQUEST ||--o{ LEDGER_ENTRY : generates
+
+' Biller relationships
+BILLER ||--|{ BILLER_SERVICE : offers
+BILLER_SERVICE ||--|{ SERVICE_INPUT_FIELD : requires
+BILLER_SERVICE ||--o{ BILL_INQUIRY : queried_for
+BILLER_SERVICE ||--o{ PAYMENT : paid_through
+BILLER_SERVICE ||--o{ FEE_RULE : governed_by
+
+' Payment workflow
+BILL_INQUIRY ||--o| PAYMENT : converts_to
+PAYMENT ||--|{ PAYMENT_STATUS_HISTORY : tracks
+PAYMENT ||--o{ BILLER_CALLBACK : receives
+PAYMENT ||--o| REFUND_REQUEST : has
+
+' Reconciliation
+RECONCILIATION_REPORT ||--o{ RECONCILIATION_ITEM : contains
+PAYMENT ||--o| RECONCILIATION_ITEM : matched_in
+
+@enduml
