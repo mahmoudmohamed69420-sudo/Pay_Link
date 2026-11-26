@@ -1,3 +1,23 @@
+The intial prompt 
+now i want to start in phase 1 i want this app to be automic and secure as it contains transactions we are now in the user story phase .
+we want to implement user stories for the system stake holders . i want you to generate the most relevant user stories to the fr . 
+generate 25 and evaluate what is critical for this type of system to be our non functional requirment. gather the stories under categories.
+Support, Notifications, Audit & Reconciliation, Core payment processing, atomicity & biller adapters ,Biller Catalog & Inquiries,Accounts,
+Wallet & Ledger. each user story has its own pre requisit and its result
+Req.md generation :
+pay-link system is a virtual wallet which acts like fawry or vodafone cash. millions of people wants to pay bills every month through mobile apps and agents. pay-link will charge small service fee on each payment. pay-link carry's heavy responsibility and must not overcharge or charge without customer notice. 
+instead of being long queues and wasting time doing repetitive tasks . 
+this is the summary i will add . add it and finish the md file using what we finalized 
+Ci and cd generation :
+so those would be inside the github actions ? where the ci would be with the liniting rules then ?
+or ou mean the ci will have the linting and testing rules plus the no pushing directly to branch on main .
+while the docker build is actually going to be as our cd?
+2: okay i will edit the pushing to main on github repo lets now see what test we will run to the add feature .
+and concerning the liniting and tests we will be using java spring boot .
+system boundries prompt 
+define the main entity models our system is going to use and define what archetectural patterns are prefered for this type of apps
+reffinment :
+did you follow the requirments and instructions and it did say we are using the monolthic archetecture?
 The prompt given to the AI to generate ER diagram:
 
 I am designing a digital wallet and bill payment system called PayLink. 
